@@ -1,0 +1,121 @@
+@model IEnumerable<SwimRoomWeb.Models.ClienteResumenViewModel>
+
+@{
+    ViewData["Title"] = "Clientes";
+    var riesgo = (string)ViewBag.Riesgo ?? "todos";
+    var search = (string)ViewBag.Search ?? "";
+}
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body py-3">
+                <div class="text-muted small">Total clientes</div>
+                <div class="fs-4 fw-bold">@ViewBag.TotalClientes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body py-3">
+                <div class="text-muted small">Clientes con riesgo alto</div>
+                <div class="fs-4 fw-bold text-danger">@ViewBag.ClientesAlto</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body py-3">
+                <div class="text-muted small">Monto total cartera</div>
+                <div class="fs-4 fw-bold">@ViewBag.MontoTotalFormatted</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body py-3">
+                <div class="text-muted small">Prob. mora promedio</div>
+                <div class="fs-4 fw-bold">@ViewBag.MoraPromedioFormatted</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+
+        <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
+            <form method="get" class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small text-muted">Filtrar por riesgo:</span>
+                   <select name="riesgo" class="form-select form-select-sm" style="width:auto;">
+                        <option value="todos" selected="@(riesgo == "todos" ? "selected" : null)">Todos</option>
+                        <option value="bajo"  selected="@(riesgo == "bajo"  ? "selected" : null)">Bajo</option>
+                        <option value="medio" selected="@(riesgo == "medio" ? "selected" : null)">Medio</option>
+                        <option value="alto"  selected="@(riesgo == "alto"  ? "selected" : null)">Alto</option>
+                    </select>
+                </div>
+
+                <div class="ms-md-3 flex-grow-1" style="max-width: 320px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input name="search" value="@search" type="text" class="form-control"
+                               placeholder="Buscar por nombre o cédula..." />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-sm btn-outline-primary ms-md-2">
+                    Aplicar
+                </button>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tablaClientes">
+                <thead class="table-light">
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Cliente</th>
+                        <th>Total ventas</th>
+                        <th>Monto total</th>
+                        <th>Ingreso mensual prom.</th>
+                        <th>Prob. mora prom.</th>
+                        <th>Riesgo máx.</th>
+                        <th>Última venta</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var c in Model)
+                {
+                    var riesgoLower = c.RiesgoMaximo.ToLower();
+                    <tr data-riesgo="@riesgoLower">
+                        <td>@c.Cedula</td>
+                        <td>@c.NombreCompleto</td>
+                        <td>@c.TotalVentas</td>
+                        <td>@c.MontoTotal.ToString("N2")</td>
+                        <td>@c.IngresoMensualPromedio.ToString("N2")</td>
+                        <td>@c.ProbMoraPromedio.ToString("P2")</td>
+                        <td>
+                            <span class="badge
+                                @(c.RiesgoMaximo == "ALTO" ? "bg-danger" :
+                                  c.RiesgoMaximo == "MEDIO" ? "bg-warning text-dark" :
+                                  "bg-success")">
+                                @c.RiesgoMaximo
+                            </span>
+                        </td>
+                        <td>@c.UltimaFechaRegistro.ToString("g")</td>
+                        <td class="text-end">
+                            <a asp-action="Detalle" asp-route-cedula="@c.Cedula"
+                               class="btn btn-sm btn-outline-primary">
+                                Ver detalle
+                            </a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>

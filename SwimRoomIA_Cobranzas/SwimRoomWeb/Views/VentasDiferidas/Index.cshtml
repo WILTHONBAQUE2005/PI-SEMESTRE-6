@@ -1,0 +1,456 @@
+@using System.Linq
+@using System.Globalization
+@model IEnumerable<SwimRoomWeb.Models.VentaDiferida>
+
+@{
+    ViewData["Title"] = "Panel de riesgo de mora";
+
+    var total = Model.Count();
+    var riesgoAlto = Model.Count(v => v.NivelRiesgo == "alto");
+    var riesgoMedio = Model.Count(v => v.NivelRiesgo == "medio");
+    var riesgoBajo = Model.Count(v => v.NivelRiesgo == "bajo");
+    var promedioProb = total > 0 ? Model.Average(v => v.ProbabilidadMora) : 0;
+
+    var montoTotal = Model.Sum(v => v.MontoCompra);
+    var montoAlto = Model.Where(v => v.NivelRiesgo == "alto").Sum(v => v.MontoCompra);
+    var montoMedio = Model.Where(v => v.NivelRiesgo == "medio").Sum(v => v.MontoCompra);
+    var montoBajo = Model.Where(v => v.NivelRiesgo == "bajo").Sum(v => v.MontoCompra);
+    var montoEnRiesgo = montoAlto + montoMedio;
+
+    var clientesEnRiesgo = riesgoAlto + riesgoMedio;
+    var porcentajeClientesEnRiesgo = total > 0
+        ? (double)clientesEnRiesgo / total
+        : 0;
+
+    // Top 3 clientes en riesgo alto
+    var topAltos = Model
+        .Where(v => v.NivelRiesgo == "alto")
+        .OrderByDescending(v => v.ProbabilidadMora)
+        .Take(3)
+        .ToList();
+
+    // Probabilidad promedio por número de cuotas (para el gráfico extra)
+    var probPorCuotas = Model
+        .GroupBy(v => v.NumCuotas)
+        .OrderBy(g => g.Key)
+        .Select(g => new
+        {
+            Cuotas = g.Key,
+            Prob = g.Average(v => v.ProbabilidadMora)
+        })
+        .ToList();
+
+    var cuotasLabels = string.Join(",", probPorCuotas.Select(g => $"'{g.Cuotas}'"));
+    var cuotasProbs = string.Join(",", probPorCuotas.Select(g => g.Prob.ToString(CultureInfo.InvariantCulture)));
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<!-- FILA 1: KPIs de clientes -->
+<div class="row mb-3">
+    <div class="col-md-3 mb-3">
+        <div class="card card-kpi shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1">Total ventas</h6>
+                <h3 class="fw-bold">@total</h3>
+                <small class="text-muted">Registros evaluados por IA</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card card-kpi shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1">Riesgo alto</h6>
+                <h3 class="fw-bold text-danger">@riesgoAlto</h3>
+                <small class="text-muted">Clientes críticos</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card card-kpi shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1">Riesgo medio</h6>
+                <h3 class="fw-bold text-warning">@riesgoMedio</h3>
+                <small class="text-muted">Seguimiento recomendado</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card card-kpi shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1">Prob. mora promedio</h6>
+                <h3 class="fw-bold">@promedioProb.ToString("P1")</h3>
+                <small class="text-muted">Sobre toda la cartera</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FILA 2: KPIs de montos -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card card-kpi shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1">Monto total cartera</h6>
+                <h3 class="fw-bold">@montoTotal.ToString("N2")</h3>
+                <small class="text-muted">En todas las ventas diferidas</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card card-kpi shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1">Monto en riesgo (medio+alto)</h6>
+                <h3 class="fw-bold text-danger">@montoEnRiesgo.ToString("N2")</h3>
+                <small class="text-muted">Exposición potencial de mora</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card card-kpi shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1">% clientes en riesgo</h6>
+                <h3 class="fw-bold">@porcentajeClientesEnRiesgo.ToString("P1")</h3>
+                <small class="text-muted">Sobre el total de clientes diferidos</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FILA 3: Gráficos + Top 3 -->
+<div class="row mb-4">
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title mb-3">Distribución de clientes por nivel de riesgo</h6>
+                <canvas id="chartClientes"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title mb-3">Monto total por nivel de riesgo</h6>
+                <canvas id="chartMontos"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-12 mb-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title mb-3">Top 3 clientes en riesgo alto</h6>
+                @if (topAltos.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var c in topAltos)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">@c.ClienteNombre</div>
+                                    <small class="text-muted">@c.Cedula</small>
+                                </div>
+                                <span class="badge bg-danger">@c.ProbabilidadMora.ToString("P1")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No hay clientes en riesgo alto en este momento.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FILA 4: Gráfico extra: riesgo promedio por número de cuotas -->
+@if (probPorCuotas.Any())
+{
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Prob. de mora promedio por número de cuotas</h6>
+                    <canvas id="chartCuotas"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 d-flex align-items-center">
+            <p class="text-muted mb-0">
+                Este gráfico permite analizar cómo se comporta la probabilidad de mora
+                según el plazo del financiamiento, ayudando a definir políticas de aprobación
+                para planes de 3, 6, 9, 12, 18, 24 o 32 cuotas.
+            </p>
+        </div>
+    </div>
+}
+
+<!-- FILA 5: filtros + tabla -->
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div class="d-flex flex-wrap gap-2">
+                <div>
+                    <label for="filtroRiesgo" class="form-label mb-0 me-2">Filtrar por riesgo:</label>
+                    <select id="filtroRiesgo" class="form-select form-select-sm d-inline-block w-auto">
+                        <option value="todos">Todos</option>
+                        <option value="bajo">Bajo</option>
+                        <option value="medio">Medio</option>
+                        <option value="alto">Alto</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="searchText" class="form-label mb-0 me-2">Buscar:</label>
+                    <input id="searchText" class="form-control form-control-sm d-inline-block"
+                           style="min-width: 220px"
+                           placeholder="Nombre, apellido o cédula..." />
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-action="Create" class="btn btn-primary">
+                    Registrar nueva venta
+                </a>
+                <a asp-action="Simulador" class="btn btn-outline-secondary">
+                    Simulador de riesgo
+                </a>
+                <a asp-action="ExportarCsv" class="btn btn-outline-success">
+                    Exportar CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive" style="max-height: 480px;">
+            <table class="table table-hover align-middle">
+                <thead class="table-light sticky-header">
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Cliente</th>
+                        <th>Monto</th>
+                        <th>Cuotas</th>
+                        <th>Ingreso mensual</th>
+                        <th>Días atraso máx.</th>
+                        <th>% cuotas pagadas</th>
+                        <th>Riesgo</th>
+                        <th>Prob. mora</th>
+                        <th>Fecha registro</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaVentas">
+@foreach (var item in Model)
+{
+    var badgeClass = item.NivelRiesgo switch
+    {
+        "alto" => "badge bg-danger",
+        "medio" => "badge bg-warning text-dark",
+        "bajo" => "badge bg-success",
+        _ => "badge bg-secondary"
+    };
+                    <tr data-riesgo="@item.NivelRiesgo"
+                        data-cedula="@item.Cedula"
+                        data-cliente="@item.ClienteNombre"
+                        data-monto="@item.MontoCompra.ToString("N2")"
+                        data-cuotas="@item.NumCuotas"
+                        data-ingreso="@item.IngresoMensual.ToString("N2")"
+                        data-dias="@item.DiasAtrasoMax"
+                        data-porcentaje="@item.PorcentajeCuotasPagadas.ToString("N0")"
+                        data-prob="@item.ProbabilidadMora.ToString("P2")"
+                        data-fecha="@item.FechaRegistro">
+                        <td>@item.Cedula</td>
+                        <td class="fw-semibold">@item.ClienteNombre</td>
+                        <td>@item.MontoCompra.ToString("N2")</td>
+                        <td>@item.NumCuotas</td>
+                        <td>@item.IngresoMensual.ToString("N2")</td>
+                        <td>@item.DiasAtrasoMax</td>
+                        <td>@item.PorcentajeCuotasPagadas.ToString("N0") %</td>
+                        <td>
+                            <span class="@badgeClass">@item.NivelRiesgo.ToUpperInvariant()</span>
+                        </td>
+                        <td>@item.ProbabilidadMora.ToString("P2")</td>
+                        <td>@item.FechaRegistro</td>
+                    </tr>
+}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DETALLE (lo dejamos igual que ya tenías) -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalle del cliente y riesgo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Cédula</dt>
+                    <dd class="col-sm-9" id="detCedula"></dd>
+
+                    <dt class="col-sm-3">Cliente</dt>
+                    <dd class="col-sm-9" id="detCliente"></dd>
+
+                    <dt class="col-sm-3">Monto compra</dt>
+                    <dd class="col-sm-9" id="detMonto"></dd>
+
+                    <dt class="col-sm-3">Número de cuotas</dt>
+                    <dd class="col-sm-9" id="detCuotas"></dd>
+
+                    <dt class="col-sm-3">Ingreso mensual</dt>
+                    <dd class="col-sm-9" id="detIngreso"></dd>
+
+                    <dt class="col-sm-3">Días atraso máx.</dt>
+                    <dd class="col-sm-9" id="detDias"></dd>
+
+                    <dt class="col-sm-3">% cuotas pagadas</dt>
+                    <dd class="col-sm-9" id="detPorcentaje"></dd>
+
+                    <dt class="col-sm-3">Probabilidad de mora</dt>
+                    <dd class="col-sm-9" id="detProb"></dd>
+
+                    <dt class="col-sm-3">Fecha registro</dt>
+                    <dd class="col-sm-9" id="detFecha"></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // --------- Filtro combinado riesgo + búsqueda ----------
+        const selectRiesgo = document.getElementById('filtroRiesgo');
+        const searchInput = document.getElementById('searchText');
+        const filas = document.querySelectorAll('#tablaVentas tr');
+
+        function aplicarFiltros() {
+            const riesgoFiltro = selectRiesgo.value;
+            const texto = searchInput.value.toLowerCase();
+
+            filas.forEach(fila => {
+                const riesgo = fila.getAttribute('data-riesgo');
+                const contenido = fila.innerText.toLowerCase();
+
+                const coincideRiesgo = (riesgoFiltro === 'todos' || riesgo === riesgoFiltro);
+                const coincideTexto = (texto === '' || contenido.includes(texto));
+
+                fila.style.display = (coincideRiesgo && coincideTexto) ? '' : 'none';
+            });
+        }
+
+        selectRiesgo.addEventListener('change', aplicarFiltros);
+        searchInput.addEventListener('keyup', aplicarFiltros);
+
+        // --------- Datos para los gráficos ----------
+        const riesgos = ['Bajo', 'Medio', 'Alto'];
+        const clientesPorRiesgo = [@riesgoBajo, @riesgoMedio, @riesgoAlto];
+        const montosPorRiesgo = [
+            @montoBajo.ToString(CultureInfo.InvariantCulture),
+            @montoMedio.ToString(CultureInfo.InvariantCulture),
+            @montoAlto.ToString(CultureInfo.InvariantCulture)
+        ];
+
+        // --------- Gráfico de barras: clientes por riesgo ----------
+        new Chart(document.getElementById('chartClientes'), {
+            type: 'bar',
+            data: {
+                labels: riesgos,
+                datasets: [{
+                    label: 'Clientes',
+                    data: clientesPorRiesgo
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+
+        // --------- Gráfico de barras: monto por riesgo ----------
+        new Chart(document.getElementById('chartMontos'), {
+            type: 'bar',
+            data: {
+                labels: riesgos,
+                datasets: [{
+                    label: 'Monto total',
+                    data: montosPorRiesgo
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // --------- Gráfico línea: prob. promedio por número de cuotas ----------
+        const cuotasLabels = [@Html.Raw(cuotasLabels)];
+        const cuotasProbs = [@Html.Raw(cuotasProbs)];
+
+        if (document.getElementById('chartCuotas')) {
+            new Chart(document.getElementById('chartCuotas'), {
+                type: 'line',
+                data: {
+                    labels: cuotasLabels,
+                    datasets: [{
+                        label: 'Prob. mora promedio',
+                        data: cuotasProbs,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // --------- Modal de detalle al hacer clic en la fila ----------
+        const modalEl = document.getElementById('detalleModal');
+        const bsModal = new bootstrap.Modal(modalEl);
+
+        filas.forEach(fila => {
+            fila.addEventListener('click', () => {
+                document.getElementById('detCedula').textContent = fila.dataset.cedula || '';
+                document.getElementById('detCliente').textContent = fila.dataset.cliente || '';
+                document.getElementById('detMonto').textContent = fila.dataset.monto || '';
+                document.getElementById('detCuotas').textContent = fila.dataset.cuotas || '';
+                document.getElementById('detIngreso').textContent = fila.dataset.ingreso || '';
+                document.getElementById('detDias').textContent = fila.dataset.dias || '';
+                document.getElementById('detPorcentaje').textContent = fila.dataset.porcentaje + ' %';
+                document.getElementById('detProb').textContent = fila.dataset.prob || '';
+                document.getElementById('detFecha').textContent = fila.dataset.fecha || '';
+
+                bsModal.show();
+            });
+        });
+    </script>
+}

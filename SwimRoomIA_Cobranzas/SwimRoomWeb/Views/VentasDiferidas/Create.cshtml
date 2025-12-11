@@ -1,0 +1,96 @@
+@model SwimRoomWeb.Models.VentaDiferidaCreateViewModel
+
+@{
+    ViewData["Title"] = "Registrar venta diferida";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Datos del cliente y de la venta</h5>
+                <p class="text-muted">
+                    Estos datos alimentan el modelo de IA para estimar el riesgo de morosidad de la compra diferida.
+                </p>
+
+                <hr />
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label asp-for="Nombres" class="form-label"></label>
+                        <input asp-for="Nombres" class="form-control" />
+                        <span asp-validation-for="Nombres" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Apellidos" class="form-label"></label>
+                        <input asp-for="Apellidos" class="form-control" />
+                        <span asp-validation-for="Apellidos" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Cedula" class="form-label"></label>
+                        <input asp-for="Cedula" class="form-control" />
+                        <span asp-validation-for="Cedula" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MontoCompra" class="form-label"></label>
+                        <input asp-for="MontoCompra" class="form-control" />
+                        <span asp-validation-for="MontoCompra" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NumCuotas" class="form-label"></label>
+                        <select asp-for="NumCuotas" class="form-select">
+                            <option value="">Seleccione...</option>
+                            <option value="3">3 cuotas</option>
+                            <option value="6">6 cuotas</option>
+                            <option value="9">9 cuotas</option>
+                            <option value="12">12 cuotas</option>
+                            <option value="18">18 cuotas</option>
+                            <option value="24">24 cuotas</option>
+                            <option value="32">32 cuotas</option>
+                        </select>
+                        <span asp-validation-for="NumCuotas" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="IngresoMensual" class="form-label"></label>
+                        <input asp-for="IngresoMensual" class="form-control" />
+                        <span asp-validation-for="IngresoMensual" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DiasAtrasoMax" class="form-label"></label>
+                        <input asp-for="DiasAtrasoMax" class="form-control" />
+                        <span asp-validation-for="DiasAtrasoMax" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PorcentajeCuotasPagadas" class="form-label"></label>
+                        <input asp-for="PorcentajeCuotasPagadas" class="form-control" />
+                        <span asp-validation-for="PorcentajeCuotasPagadas" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            Guardar y evaluar riesgo
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            Volver al listado
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SwimRoomIA_Cobranzas", "SwimRoomIA_Cobranzas", "{311D4897-DFA9-0398-F025-5D146C36BE90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwimRoomWeb", "SwimRoomIA_Cobranzas\SwimRoomWeb\SwimRoomWeb.csproj", "{37106001-F7B0-3AF0-D173-8BAA239AFEC6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37106001-F7B0-3AF0-D173-8BAA239AFEC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37106001-F7B0-3AF0-D173-8BAA239AFEC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37106001-F7B0-3AF0-D173-8BAA239AFEC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37106001-F7B0-3AF0-D173-8BAA239AFEC6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{37106001-F7B0-3AF0-D173-8BAA239AFEC6} = {311D4897-DFA9-0398-F025-5D146C36BE90}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5E9847A9-E85A-4671-BD48-4E31667FAF66}
+	EndGlobalSection
+EndGlobal

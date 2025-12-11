@@ -1,0 +1,247 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;                
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #f5f7fb; 
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/**/
+body {
+    background-color: #f5f7fb;
+}
+
+.card-kpi {
+    border-radius: 1rem;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.badge {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+}
+
+
+#tablaClientes tr[data-riesgo="alto"] td,
+#tablaClientesVentas tr[data-riesgo="alto"] td {
+    background-color: #fff5f5;
+}
+
+#tablaClientes tr[data-riesgo="medio"] td,
+#tablaClientesVentas tr[data-riesgo="medio"] td {
+    background-color: #fffaf0;
+}
+
+#tablaClientes tr[data-riesgo="bajo"] td,
+#tablaClientesVentas tr[data-riesgo="bajo"] td {
+    background-color: #f5fff7;
+}
+
+#tablaClientes tr:hover td,
+#tablaClientesVentas tr:hover td {
+    background-color: #e8f0fe !important;
+}
+
+
+#tablaVentas tr[data-riesgo="alto"] td {
+    background-color: #fff5f5;
+}
+
+#tablaVentas tr[data-riesgo="medio"] td {
+    background-color: #fffaf0;
+}
+
+#tablaVentas tr[data-riesgo="bajo"] td {
+    background-color: #f5fff7;
+}
+
+#tablaVentas tr:hover td {
+    background-color: #e8f0fe !important;
+}
+
+
+:root {
+    --brand-primary: #0b1b7a;
+    --brand-accent: #2563eb;
+    --sidebar-bg: #0f172a;
+    --sidebar-bg-light: #111827;
+    --sidebar-border: #1f2933;
+}
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, #e0e7ff 0, #f3f4ff 40%, #f9fafb 100%);
+}
+
+.login-card {
+    max-width: 420px;
+    width: 100%;
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+}
+
+.login-input {
+    border-radius: 12px;
+    height: 44px;
+    font-size: 0.95rem;
+}
+
+.login-button {
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.brand-title {
+    font-weight: 700;
+    font-size: 1.6rem;
+}
+
+.brand-primary {
+    color: var(--brand-primary);
+}
+
+.brand-accent {
+    color: var(--brand-accent);
+}
+
+.app-shell {
+    min-height: 100vh;
+    background-color: #f5f7fb;
+}
+
+.sidebar {
+    width: 270px;
+    background: linear-gradient(180deg, #020617 0%, #020617 40%, #020617 100%);
+    color: #e5e7eb;
+    padding: 1.5rem 1.25rem;
+    box-shadow: 8px 0 24px rgba(15, 23, 42, 0.35);
+}
+
+.sidebar-header .brand-title {
+    font-size: 1.4rem;
+}
+
+.sidebar-menu {
+    margin-top: 1.5rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    color: #e5e7eb;
+    text-decoration: none;
+    margin-bottom: 0.35rem;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.sidebar-link .sidebar-icon {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.sidebar-link:hover {
+    background: rgba(37, 99, 235, 0.12);
+    transform: translateX(2px);
+}
+
+.sidebar-link.active {
+    background: radial-gradient(circle at left, #2563eb 0%, #1d4ed8 40%, #020617 100%);
+    font-weight: 600;
+}
+
+.sidebar-link.active .sidebar-icon {
+    opacity: 1;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.35);
+    font-size: 0.8rem;
+}
+
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background-color: rgba(148, 163, 184, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e5e7eb;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;  
+}
+
+.main-header {
+    min-height: 48px;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+#tablaVentas tr[data-riesgo="alto"] td {
+    background-color: #fff5f5;
+}
+
+#tablaVentas tr[data-riesgo="medio"] td {
+    background-color: #fffaf0;
+}
+
+#tablaVentas tr[data-riesgo="bajo"] td {
+    background-color: #f5fff7;
+}
+
+#tablaVentas tr:hover td {
+    background-color: #e8f0fe !important;
+}
